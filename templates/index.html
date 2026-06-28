@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QEdge Profiler - AI Inference & Memory Health Platform</title>
+
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        body {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+        .metric-label {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #7c3aed;
+            margin-top: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+        }
+        .btn-secondary {
+            background: #334155;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        .alert-banner {
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease-out;
+        }
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left-color: #f59e0b;
+            color: #fbbf24;
+        }
+        .alert-critical {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: #ef4444;
+            color: #f87171;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab:hover {
+            background: rgba(124, 58, 237, 0.1);
+        }
+        .tab.active {
+            border-bottom-color: #7c3aed;
+            color: #7c3aed;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 16px 0;
+            border: 1px solid #334155;
+        }
+        input, select {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            color: #e2e8f0;
+            width: 100%;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #7c3aed;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-purple-900 to-indigo-900 p-6 shadow-lg">
+        <div class="container mx-auto">
+            <h1 class="text-4xl font-bold text-white flex items-center">
+                <span class="text-5xl mr-3">🚀</span>
+                QEdge Profiler
+            </h1>
+            <p class="text-purple-200 mt-2">AI Inference Benchmarking & Memory Health Platform</p>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <nav class="bg-slate-800 border-b border-slate-700">
+        <div class="container mx-auto flex">
+            <div class="tab active" onclick="showTab('monitor')">Memory Monitor</div>
+            <div class="tab" onclick="showTab('benchmark')">Benchmark</div>
+            <div class="tab" onclick="showTab('history')">History</div>
+            <div class="tab" onclick="showTab('system')">System Info</div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-6">
+
+        <!-- Tab: Memory Monitor -->
+        <div id="tab-monitor" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Control Panel -->
+                <div class="card">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-400">Control Panel</h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block mb-2 text-sm">Process ID (PID)</label>
+                            <input type="number" id="pid-input" placeholder="Enter PID" class="w-full">
+                        </div>
+
+                        <button onclick="attachProcess()" class="btn-primary w-full">
+                            Start Monitoring
+                        </button>
+
+                        <button onclick="stopMonitoring()" class="btn-secondary w-full">
+                            Stop Monitoring
+                        </button>
+
+                        <hr class="border-slate-700 my-4">
+
+                        <button onclick="runLeakyScript()" class="btn-secondary w-full">
+                            🧪 Run Demo Leaky Script
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Metrics Dashboard -->
+                <div class="lg:col-span-2">
+                    <!-- Metric Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="metric-card">
+                            <div class="metric-label">Session ID</div>
+                            <div class="metric-value" id="metric-session">-</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">RSS (MB)</div>
+                            <div class="metric-value" id="metric-rss">-</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">CPU (%)</div>
+                            <div class="metric-value" id="metric-cpu">-</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Leak Score</div>
+                            <div class="metric-value" id="metric-leak">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts -->
+                    <div id="alerts-container"></div>
+
+                    <!-- Charts -->
+                    <div class="card">
+                        <h3 class="text-xl font-bold mb-4">Memory Usage (RSS)</h3>
+                        <div class="chart-container">
+                            <canvas id="rss-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-xl font-bold mb-4">CPU Usage</h3>
+                        <div class="chart-container">
+                            <canvas id="cpu-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Benchmark -->
+        <div id="tab-benchmark" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <!-- Benchmark Controls -->
+                <div class="card">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-400">Benchmark Setup</h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block mb-2 text-sm">Model</label>
+                            <select id="model-select" class="w-full">
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-sm">Backend</label>
+                            <select id="backend-select" class="w-full">
+                                <option value="CPU">CPU</option>
+                                <option value="GPU">GPU</option>
+                                <option value="NPU">NPU</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-sm">Iterations</label>
+                            <input type="number" id="iterations-input" value="100" class="w-full">
+                        </div>
+
+                        <button onclick="runBenchmark()" class="btn-primary w-full">
+                            🚀 Run Benchmark
+                        </button>
+
+                        <button onclick="runInlineBenchmark()" class="btn-secondary w-full">
+                            ⚡ Quick Test (Inline)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Benchmark Results -->
+                <div class="lg:col-span-2">
+                    <div class="card">
+                        <h3 class="text-xl font-bold mb-4">Benchmark Results</h3>
+                        <div id="benchmark-results">
+                            <p class="text-slate-400">Run a benchmark to see results</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-xl font-bold mb-4">Performance Comparison</h3>
+                        <div class="chart-container">
+                            <canvas id="benchmark-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: History -->
+        <div id="tab-history" class="tab-content hidden">
+            <div class="card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-purple-400">Session History</h2>
+                    <button onclick="loadHistory()" class="btn-secondary">Refresh</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left" id="history-table">
+                        <thead>
+                            <tr class="border-b border-slate-700">
+                                <th class="p-3">ID</th>
+                                <th class="p-3">Type</th>
+                                <th class="p-3">Model</th>
+                                <th class="p-3">Backend</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">Start Time</th>
+                                <th class="p-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <tr>
+                                <td colspan="7" class="p-3 text-center text-slate-400">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: System Info -->
+        <div id="tab-system" class="tab-content hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-400">ONNX Runtime</h2>
+                    <div id="system-onnx">Loading...</div>
+                </div>
+
+                <div class="card">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-400">Available Backends</h2>
+                    <div id="system-backends">Loading...</div>
+                </div>
+
+                <div class="card md:col-span-2">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-400">Available Models</h2>
+                    <div id="system-models">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 p-6 mt-12">
+        <div class="container mx-auto text-center text-slate-400">
+            <p>QEdge Profiler - Built for Edge AI Developers</p>
+            <p class="mt-2 text-sm">Real-time Memory Leak Detection + AI Benchmarking</p>
+        </div>
+    </footer>
+
+    <!-- Load external JavaScript -->
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
