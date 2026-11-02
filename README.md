@@ -299,45 +299,7 @@ plyer==2.1.0
 
 ## 📄 License
 
-Open source - built for the edge AI community.
-
----
-
-## 🎓 LinkedIn Post
-
-> **Built QEdge Profiler** — an open-source AI inference benchmarking and memory leak detection platform for edge devices.
->
-> **Key Features:**
-> - Benchmarks ONNX models across CPU/GPU/NPU with real-time latency and FPS tracking
-> - Simultaneously monitors inference process memory via psutil + linear regression
-> - Introduces "Model Memory Health Score" — a composite metric (FPS + memory stability) not found in standard tools
-> - Full-stack Flask dashboard with Chart.js, SSE live updates, and CSV/PDF export
-> - Cross-platform: runs on Linux edge boards and Windows dev machines
->
-> **Tech:** Python, Flask, ONNX Runtime, Chart.js, SQLite, linear regression
->
-> Perfect for edge AI development where memory constraints are critical.
->
-> #EdgeAI #Python #Flask #ONNX #MemoryProfiling #OpenSource #MLOps #AIInference
-
----
-
-## 🚀 Project Status
-
-**✅ COMPLETE - All planned features implemented**
-
-✓ Core memory monitoring  
-✓ Leak detection algorithm  
-✓ ONNX benchmarking  
-✓ Model registry  
-✓ Health scoring  
-✓ Chart.js visualizations  
-✓ CSV/PDF export  
-✓ REST API  
-✓ SSE streaming  
-✓ Dark theme UI  
-✓ Demo script  
-✓ Comprehensive testing  
+Open source - built for the edge AI community.  
 
 ---
 
